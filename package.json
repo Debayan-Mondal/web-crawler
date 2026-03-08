@@ -1,0 +1,24 @@
+{
+  "name": "web-crawler",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Debayan-Mondal/web-crawler.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/Debayan-Mondal/web-crawler/issues"
+  },
+  "homepage": "https://github.com/Debayan-Mondal/web-crawler#readme",
+  "dependencies": {
+    "puppeteer": "^24.38.0"
+  }
+}
