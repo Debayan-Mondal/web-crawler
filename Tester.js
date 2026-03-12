@@ -1,7 +1,8 @@
-import { normalizeURL } from "./Crawler.js"
+import { getHTMLfromPage, normalizeURL } from "./Spider.js"
 
 (() => {
     const url = "https://www.Wagslane.dev";
-    console.log(normalizeURL(url));
+    const urlObj = normalizeURL(url);
+    getHTMLfromPage(urlObj.href);
 
 })()
