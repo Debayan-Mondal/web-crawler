@@ -8,6 +8,6 @@ Web Crawler
 
 
 To run use commands:
-git clone 
+`git clone 
 cd web-crawler
-node index.js <website-name>
+node index.js <website-name>`
