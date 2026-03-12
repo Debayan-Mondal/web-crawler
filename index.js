@@ -1,9 +1,15 @@
-import { getHTMLfromPage, normalizeURL } from "./Spider.js"
+import { getHTMLfromWebsite, normalizeURL } from "./Spider.js"
 
+async function main() {
+    const args = process.argv.slice(2);
+    const seedURL = args[0];
+    const urlObj = normalizeURL(seedURL);
+    await getHTMLfromWebsite(urlObj);
+    console.log("Done");
+    process.exit(0);
 
-const seeds = ["https://www.wagslane.dev"];
-const normalizedSeeds = seeds.map(seed =>  normalizeURL(seed));
-console.log(await getHTMLfromPage(normalizedSeeds[0].href));
+}
+main();
 
 
 
