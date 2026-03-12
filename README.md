@@ -7,7 +7,7 @@ Web Crawler
 •	Used BFS to navigate through website.
 
 
-To run use commands:
+To run use commands: <br/>
 `git clone` <br/>
 `cd web-crawler` <br/>
-`node index.js` <website-name>`
+`node index.js <website-name>`
