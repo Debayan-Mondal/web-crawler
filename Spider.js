@@ -11,31 +11,36 @@ export const getHTMLfromPage = async(url,page) => {
         const urlObjects = urls.map(url => normalizeURL(url));
         return urlObjects;
     } catch (err) {
-        console.log("Error in getting HTML", err);
+        console.log("Error in getting HTML");
         return [];
     }
 }
 
 
-export const getHTMLfromWebsite = async(seedURL) => {
-    const parrallelProccesses = 5;
-    const browser = await puppeteer.launch({headless: true, args: [
-            '--no-sandbox',
-            '--disable-setuid-sandbox',
-            '--disable-dev-shm-usage',
-            '--disable-accelerated-2d-canvas',
-            '--no-first-run',
-            '--no-zygote',
-            '--single-process',
-            '--disable-gpu'
-        ]});
+
+
+export const getHTMLfromWebsite = async(seedURL, clusterPage) => {
+    const restrictedPaths = [];
+    const parrallelProccesses = 4;
+    const browser = clusterPage.browser();
     const urlLeft = [seedURL.href];
     const pathURL = new Set();
     const websiteURL = new Set();
     const urlVisited = new Set();
+    const response = await clusterPage.goto(`${seedURL.href}robots.txt`);
+    const rawText = await response.text();
+    if(rawText) {
+         const lines = rawText.split("\n");
+         lines.forEach(line => {
+            if(line.startsWith("Disallow:")) {
+                restrictedPaths.push((line.split(": ")[1]).slice(0,-1));
+            }
+         })
+    }
+
     while(urlLeft.length > 0) {
         let urls = urlLeft.splice(0, parrallelProccesses);
-        urls = urls.filter(url=> !urlVisited.has(url));
+        urls = urls.filter(url=> !urlVisited.has(url) && !restrictedPaths.some(path => url.includes(path)));
         urls.forEach(url => {
             urlVisited.add(url);
         });
@@ -45,23 +50,24 @@ export const getHTMLfromWebsite = async(seedURL) => {
             page.close();
             return pageURL;
         })
-        const newURLs =new Set((await Promise.all(promises)).flat());
-        // const newURLs = await getHTMLfromPage(url, page);
+        const newURLs = (await Promise.all(promises)).flat();
         newURLs.forEach(url => {
-            if(url.hostname === seedURL.hostname) {
+            if(url.href !== seedURL.href) {
+                if(url.hostname === seedURL.hostname) {
                 pathURL.add(url.href);
                 urlLeft.push(url.href);
             } else {
                 websiteURL.add(`https://${url.hostname}`);
             }
+            }
+            
         });
     }
-    console.log("Crawling Completed");
-    console.log("Internal Paths...");
-    console.log(pathURL);
-    console.log("External Websites...");
-    console.log(websiteURL);
-    return;
+
+    const result = [];
+    result.push(...pathURL);
+    result.push(...websiteURL);
+    return result;
 }
 
 export const normalizeURL = (url) => {

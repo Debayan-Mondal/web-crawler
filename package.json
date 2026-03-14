@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/Debayan-Mondal/web-crawler#readme",
   "dependencies": {
-    "puppeteer": "^24.39.0"
+    "puppeteer": "^24.39.0",
+    "puppeteer-cluster": "^0.25.0"
   }
 }
