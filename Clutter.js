@@ -7,7 +7,7 @@ export const multipleWebsite = async (urls) => {
     const cluster = await Cluster.launch({
         concurrency: Cluster.CONCURRENCY_BROWSER,
         maxConcurrency: 2,
-        monitor: false,
+        monitor: true,
         timeout: 10000000,
         puppeteerOptions: {
             headless: true

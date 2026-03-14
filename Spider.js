@@ -2,7 +2,6 @@ import puppeteer from "puppeteer";
 
 export const getHTMLfromPage = async(url,page) => {
     try {
-        console.log(url);
         const response = await page.goto(url);
         const contentType = response.headers()['content-type'];
         if (!contentType.includes('text/html')) return [];
@@ -21,7 +20,7 @@ export const getHTMLfromPage = async(url,page) => {
 
 export const getHTMLfromWebsite = async(seedURL, clusterPage) => {
     const restrictedPaths = [];
-    const parrallelProccesses = 4;
+    const parrallelProccesses = 2;
     const browser = clusterPage.browser();
     const urlLeft = [seedURL.href];
     const pathURL = new Set();
