@@ -31,7 +31,7 @@ web-crawler/
 **Prerequisites:** Node.js 18+
 
 ```bash
-git clone https://github.com/your-username/web-crawler.git
+git clone https://github.com/Debayan-Mondal/web-crawler.git
 cd web-crawler
 npm install
 ```
