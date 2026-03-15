@@ -1,9 +1,21 @@
-import puppeteer from "puppeteer";
 
+
+//Normalizing URL
+export const normalizeURL = (url) => {
+    if (url.endsWith("/")) {
+        url = url.slice(0,-1);
+    }
+    const urlObj = new URL(url);
+    return urlObj
+}
+
+//Getting HTML from each Page
 export const getHTMLfromPage = async(url,page) => {
     try {
-        console.log(url);
-        const response = await page.goto(url);
+        const response = await page.goto(url, {
+            waitUntil: "domcontentloaded",
+            timeout: 30000
+        });
         const contentType = response.headers()['content-type'];
         if (!contentType.includes('text/html')) return [];
         await page.waitForSelector('a', { timeout: 2000 });
@@ -18,17 +30,14 @@ export const getHTMLfromPage = async(url,page) => {
 
 
 
-
-export const getHTMLfromWebsite = async(seedURL, clusterPage) => {
-    const restrictedPaths = [];
-    const parrallelProccesses = 2;
-    const browser = clusterPage.browser();
-    const urlLeft = [seedURL.href];
-    const pathURL = new Set();
-    const websiteURL = new Set();
-    const urlVisited = new Set();
-    const response = await clusterPage.goto(`${seedURL.href}robots.txt`);
+//Extracting Forbidden Paths from Robots.txt
+export const robotsTxtReader = async(seedURL) => {
+    try {
+        const restrictedPaths = [];
+    const response = await fetch(`${seedURL.origin}/robots.txt`);
+    if (!response.ok) return [];
     const rawText = await response.text();
+    if (!rawText) return [];
     if(rawText) {
          const lines = rawText.split("\n");
          lines.forEach(line => {
@@ -37,44 +46,11 @@ export const getHTMLfromWebsite = async(seedURL, clusterPage) => {
             }
          })
     }
-
-    while(urlLeft.length > 0) {
-        let urls = urlLeft.splice(0, parrallelProccesses);
-        urls = urls.filter(url=> !urlVisited.has(url) && !restrictedPaths.some(path => url.includes(path)));
-        urls.forEach(url => {
-            urlVisited.add(url);
-        });
-        const promises = urls.map(async(url) => {
-            const page = await browser.newPage();
-            const pageURL = await getHTMLfromPage(url, page);
-            page.close();
-            return pageURL;
-        })
-        const newURLs = (await Promise.all(promises)).flat();
-        newURLs.forEach(url => {
-            if(url.href !== seedURL.href) {
-                if(url.hostname === seedURL.hostname) {
-                pathURL.add(url.href);
-                urlLeft.push(url.href);
-            } else {
-                websiteURL.add(`https://${url.hostname}`);
-            }
-            }
-            
-        });
+    return restrictedPaths;
+    } catch {
+        console.log("Error in Fetching robots.txt", err);
+        return [];
     }
 
-    const result = [];
-    result.push(...pathURL);
-    result.push(...websiteURL);
-    return result;
-}
-
-export const normalizeURL = (url) => {
-    if (url.endsWith("/")) {
-        url = url.slice(0,-1);
-    }
-    const urlObj = new URL(url);
-    return urlObj
 }
 

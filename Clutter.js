@@ -1,5 +1,5 @@
 import { Cluster } from 'puppeteer-cluster';
-import { getHTMLfromPage, getHTMLfromWebsite } from "./Spider.js";
+import { getHTMLfromPage, robotsTxtReader } from "./Spider.js";
 
 const normalizeHost = (hostname) => hostname.replace(/^www\./, "");
 
@@ -7,9 +7,9 @@ export const multipleWebsite = async (urls) => {
     const result = {};
     const cluster = await Cluster.launch({
         concurrency: Cluster.CONCURRENCY_PAGE,
-        maxConcurrency: 5,
+        maxConcurrency: 8,
         retryLimit: 2,
-        monitor: false,
+        monitor: true,
         timeout: 50000,
         puppeteerOptions: {
             headless: true
@@ -17,11 +17,11 @@ export const multipleWebsite = async (urls) => {
     })
     await cluster.task(async({page, data}) => {
         try {
-            const {currentURL, seedURL} = data
+            const {currentURL, seedURL, restrictedPaths} = data;
             const newURLs = await getHTMLfromPage(currentURL.href, page);
             
             for (const url of newURLs) {
-                if((url.href === seedURL.href)) continue;
+                if((url.href === seedURL.href) || restrictedPaths.some(path => (url.href).includes(path))) continue;
                 
                 if(normalizeHost(url.hostname) !== normalizeHost(currentURL.hostname)) {
                     const urlHost = `https://${normalizeHost(url.hostname)}`
@@ -32,7 +32,8 @@ export const multipleWebsite = async (urls) => {
                         result[seedURL.hostname].add(url.href);
                         cluster.queue({
                             currentURL: url,
-                            seedURL: seedURL
+                            seedURL: seedURL,
+                            restrictedPaths: restrictedPaths
                     });
                     }
                 }
@@ -44,16 +45,17 @@ export const multipleWebsite = async (urls) => {
         }
     })
 
-
-
-    //Startup code
-    urls.forEach(url => {
+    //Start
+    for(const url of urls) {
         result[url.hostname] = new Set();
+        const restrictedPaths = await robotsTxtReader(url);
         cluster.queue({
             currentURL: url,
-            seedURL: url
+            seedURL: url,
+            restrictedPaths: restrictedPaths
         });
-    })
+    }
+
 
     await cluster.idle();
     await cluster.close();
