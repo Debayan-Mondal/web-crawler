@@ -2,6 +2,7 @@ import puppeteer from "puppeteer";
 
 export const getHTMLfromPage = async(url,page) => {
     try {
+        console.log(url);
         const response = await page.goto(url);
         const contentType = response.headers()['content-type'];
         if (!contentType.includes('text/html')) return [];
@@ -76,3 +77,4 @@ export const normalizeURL = (url) => {
     const urlObj = new URL(url);
     return urlObj
 }
+
