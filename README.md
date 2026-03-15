@@ -1,4 +1,4 @@
-# 🕷️ Node.js Web Crawler
+# Node.js Web Crawler
 
 A concurrent, multi-site web crawler built with [Puppeteer Cluster](https://github.com/thomasdondorf/puppeteer-cluster). It crawls one or more seed URLs, maps all internal pages, collects external links, and respects `robots.txt` rules — all in parallel.
 
